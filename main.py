@@ -9,24 +9,34 @@ root.iconbitmap("C:/Users/mgelh/PycharmProjects/YoutubeDownloader/media/logo_you
 root.minsize(width=600, height=150)
 
 quality = StringVar()
+format_opts = ["No URL chosen"]
+formats_drop = OptionMenu(root, quality, *format_opts)
 
+def showdloadbtn(args):
+    dload_btn = Button(root, text="Download", command=download)
+    dload_btn.grid(row=2, column=2)
 
 def showformats():
     ydl = youtube_dl.YoutubeDL({'outtmpl': '%(id)s.%(ext)s'})
     result = ydl.extract_info(inputEntry.get(), download=False)
     formats = result.get('formats', [result])
 
-    i = 2
+    global formats_drop
+    global format_opts
+
+    format_opts = []
     for f in formats:
-        # todo lieber als dropdown? liste anlegen und items einfügen
-        
-        # r = Radiobutton(root, text=(f['format'] + "   " + f['ext']), variable=quality, value=f['format'])
-        # r.grid(row=i, column=0, columnspan=2)
-        i += 1
+        format_opts.append(f["format"] + "   " + f["ext"])
+
+    formats_drop.destroy()
+    formats_drop = OptionMenu(root, quality, *format_opts, command=showdloadbtn)
+    formats_drop.grid(row=2, column=0, columnspan=2)
 
 
 def download():
-    ydl_opts = {}
+    ydl_opts = {
+        # "format": "249 - audio only (tiny)"
+    }
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         ydl.download([link])
 
@@ -45,5 +55,6 @@ inputEntry.insert(0,
 inputLabel.grid(row=0, column=0)
 inputEntry.grid(row=0, column=1)
 formatsButton.grid(row=1, column=1)
+formats_drop.grid(row=2, column=0, columnspan=2)
 
 root.mainloop()
